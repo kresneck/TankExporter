@@ -1461,16 +1461,24 @@ save_it:
 
         For Each f In tank_pkg_search_list
             Using zipf As New ZipFile(f)
-                For Each entry In zipf
-                    If Not entry.IsDirectory Then
-                        If entry.FileName.ToLower = ss Then
-                            entry.Extract(My.Settings.res_mods_path + "\", ExtractExistingFileAction.DoNotOverwrite)
-                            zipf.Dispose()
-                            GC.Collect()
-                            Return True
+                Dim item = zipf.Item(ss)
+                If item IsNot Nothing Then
+                    item.Extract(My.Settings.res_mods_path + "\", ExtractExistingFileAction.DoNotOverwrite)
+                    zipf.Dispose()
+                    GC.Collect()
+                    Return True
+                ElseIf ITERATE_ZIP_FILES Then
+                    For Each entry In zipf
+                        If Not entry.IsDirectory Then
+                            If entry.FileName.ToLower = ss Then
+                                entry.Extract(My.Settings.res_mods_path + "\", ExtractExistingFileAction.DoNotOverwrite)
+                                zipf.Dispose()
+                                GC.Collect()
+                                Return True
+                            End If
                         End If
-                    End If
-                Next
+                    Next
+                End If
             End Using
         Next
         Return False
@@ -1499,15 +1507,22 @@ save_it:
 
         For Each f In tank_pkg_search_list
             Using zipf As New ZipFile(f)
-                For Each entry In zipf
-                    If Not entry.IsDirectory Then
-                        If entry.FileName.ToLower = ss Then
-                            zipf.Dispose()
-                            GC.Collect()
-                            Return entry
+                Dim item = zipf.Item(ss)
+                If item IsNot Nothing Then
+                    zipf.Dispose()
+                    GC.Collect()
+                    Return item
+                ElseIf ITERATE_ZIP_FILES Then
+                    For Each entry In zipf
+                        If Not entry.IsDirectory Then
+                            If entry.FileName.ToLower = ss Then
+                                zipf.Dispose()
+                                GC.Collect()
+                                Return entry
+                            End If
                         End If
-                    End If
-                Next
+                    Next
+                End If
             End Using
         Next
         Return Nothing
@@ -1519,6 +1534,13 @@ save_it:
         Dim ss = pp.ToLower.Replace("\", "/")
         For Each f In pkg_search_list
             Using zipf As New ZipFile(f)
+                Dim item = zipf.Item(ss)
+                If item IsNot Nothing Then
+                    item.Extract(My.Settings.res_mods_path + "\", ExtractExistingFileAction.DoNotOverwrite)
+                    zipf.Dispose()
+                    GC.Collect()
+                    Return True
+                End If
                 For Each entry In zipf
                     If Not entry.IsDirectory Then
                         If entry.FileName.ToLower = ss Then
@@ -1539,8 +1561,10 @@ save_it:
         If name Is Nothing Then name = ""
         Dim ent As Ionic.Zip.ZipEntry = Nothing
         If name = "" Then Return -1
+        If Not ENABLE_HD_TEXTURES Then
+            GoTo skip_hd
+        End If
         If My.Settings.res_mods_path.Contains("res_mods") Then
-            'GoTo skip_hd
             Dim r_path = My.Settings.res_mods_path + "\" + name.Replace(".dds", "_hd.dds")
             Dim r_pathSD = My.Settings.res_mods_path + "\" + name
             If name.Contains("res_mods") Then

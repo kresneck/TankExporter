@@ -43,6 +43,9 @@ Module modGlobals
     Public TERRAIN_DECALS As Boolean
     Public tank_api_id As String
 
+    Public ENABLE_HD_TEXTURES As Boolean = False
+    Public ITERATE_ZIP_FILES As Boolean = False
+
     Public FBX_NAME As String = ""
     Public decal_path As String
     Public terrain_modelId As Integer
