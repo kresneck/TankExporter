@@ -2394,7 +2394,7 @@ loaded_jump:
                 node_list(i).item(cnt).node = n
                 node_list(i).item(cnt).package = packages(i).Name
                 icons(i).img(cnt) = New entry_
-                icons(i).img(cnt).img = get_tank_icon(n.Text).Clone
+                icons(i).img(cnt).img = get_tank_icon(t.nation, n.Text).Clone
                 icons(i).img(cnt).name = t.tag
                 If icons(i).img(cnt) IsNot Nothing Then
                     node_list(i).item(cnt).icon = icons(i).img(cnt).img.Clone
@@ -2622,7 +2622,20 @@ loaded_jump:
         Return ""
     End Function
 
-    Private Function get_tank_icon(ByVal name As String) As Bitmap
+    Private Function get_tank_icon(ByVal nation As String, ByVal name As String) As Bitmap
+        Dim fileName = "gui/maps/icons/vehicle/" + nation + "-" + name + ".png"
+        Dim item = gui_pkg_part_1.Item(fileName)
+        If item Is Nothing Then
+            item = gui_pkg_part_2.Item(fileName)
+        End If
+        Dim ms As New MemoryStream
+        item.Extract(ms)
+        If ms IsNot Nothing Then
+            current_png_path = item.FileName
+            Return get_png(ms).Clone
+        End If
+
+        ' In current versions of the packages, it never gets this far.
         For Each entry In gui_pkg_part_1
             If entry.FileName.Contains(name) And entry.FileName.Contains("/icons/vehicle/") _
             And Not entry.FileName.Contains("small") _
@@ -2630,7 +2643,6 @@ loaded_jump:
             And Not entry.FileName.Contains("unique") _
             And Not entry.FileName.Contains("library") _
                 Then
-                Dim ms As New MemoryStream
                 entry.Extract(ms)
                 If ms IsNot Nothing Then
                     current_png_path = entry.FileName
@@ -2645,7 +2657,6 @@ loaded_jump:
             And Not entry.FileName.Contains("unique") _
             And Not entry.FileName.Contains("library") _
                 Then
-                Dim ms As New MemoryStream
                 entry.Extract(ms)
                 If ms IsNot Nothing Then
                     current_png_path = entry.FileName
