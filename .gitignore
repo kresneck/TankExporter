@@ -29,3 +29,5 @@ _ReSharper*/
 [Tt]est[Rr]esult*
 *.vssscc
 $tf*/
+/.vs
+/UpgradeLog2.htm
