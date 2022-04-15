@@ -39,20 +39,20 @@ Partial Class frmComponents
         Me.tv_guns.BackColor = System.Drawing.Color.FromArgb(CType(CType(64, Byte), Integer), CType(CType(64, Byte), Integer), CType(CType(64, Byte), Integer))
         Me.tv_guns.CheckBoxes = True
         Me.tv_guns.ForeColor = System.Drawing.Color.White
-        Me.tv_guns.Location = New System.Drawing.Point(12, 166)
+        Me.tv_guns.Location = New System.Drawing.Point(208, 166)
         Me.tv_guns.Name = "tv_guns"
         Me.tv_guns.Size = New System.Drawing.Size(190, 115)
-        Me.tv_guns.TabIndex = 5
+        Me.tv_guns.TabIndex = 7
         '
         'tv_turrets
         '
         Me.tv_turrets.BackColor = System.Drawing.Color.FromArgb(CType(CType(64, Byte), Integer), CType(CType(64, Byte), Integer), CType(CType(64, Byte), Integer))
         Me.tv_turrets.CheckBoxes = True
         Me.tv_turrets.ForeColor = System.Drawing.Color.White
-        Me.tv_turrets.Location = New System.Drawing.Point(208, 166)
+        Me.tv_turrets.Location = New System.Drawing.Point(12, 166)
         Me.tv_turrets.Name = "tv_turrets"
         Me.tv_turrets.Size = New System.Drawing.Size(190, 115)
-        Me.tv_turrets.TabIndex = 7
+        Me.tv_turrets.TabIndex = 5
         '
         'continue_bt
         '
@@ -67,20 +67,20 @@ Partial Class frmComponents
         '
         Me.Label1.AutoSize = True
         Me.Label1.ForeColor = System.Drawing.Color.White
-        Me.Label1.Location = New System.Drawing.Point(208, 150)
+        Me.Label1.Location = New System.Drawing.Point(12, 150)
         Me.Label1.Name = "Label1"
         Me.Label1.Size = New System.Drawing.Size(73, 13)
-        Me.Label1.TabIndex = 6
+        Me.Label1.TabIndex = 4
         Me.Label1.Text = "Found Turrets"
         '
         'Label2
         '
         Me.Label2.AutoSize = True
         Me.Label2.ForeColor = System.Drawing.Color.White
-        Me.Label2.Location = New System.Drawing.Point(12, 150)
+        Me.Label2.Location = New System.Drawing.Point(208, 150)
         Me.Label2.Name = "Label2"
         Me.Label2.Size = New System.Drawing.Size(65, 13)
-        Me.Label2.TabIndex = 4
+        Me.Label2.TabIndex = 6
         Me.Label2.Text = "Found Guns"
         '
         'Label3
