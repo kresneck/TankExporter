@@ -1987,7 +1987,6 @@ loaded_jump:
     Public Sub get_tank_parts_from_xml(ByVal tank As String, ByRef data_set As DataSet)
         'once again the non-standard name calling causes issues
         'Why not use USA for the nation in all paths???? czech, japan, sweeden, poland are ok as is
-        Dim turret_names() As String = {"0", "1", "2", "3", "_0", "_1", "_2", "_3"}
         If tank.Contains("american") Then
             tank = tank.Replace("american", "usa")
         End If
@@ -2182,6 +2181,267 @@ loaded_jump:
         data_set.Tables("gun_name").Select.First.Delete()
         ms.Dispose()
         fm.Dispose()
+
+        get_tank_parts_from_xml__TOM(tank)
+    End Sub
+
+    Public Sub get_tank_parts_from_xml__TOM(ByVal tank As String)
+        'once again the non-standard name calling causes issues
+        'Why not use USA for the nation in all paths???? czech, japan, sweeden, poland are ok as is
+        If tank.Contains("american") Then
+            tank = tank.Replace("american", "usa")
+        End If
+        If tank.Contains("british") Then
+            tank = tank.Replace("british", "uk")
+        End If
+        If tank.Contains("chinese") Then
+            tank = tank.Replace("chinese", "china")
+        End If
+        If tank.Contains("french") Then
+            tank = tank.Replace("french", "france")
+        End If
+        If tank.Contains("german") Then
+            tank = tank.Replace("german", "germany")
+        End If
+        If tank.Contains("russian") Then
+            tank = tank.Replace("russian", "ussr")
+        End If
+        ' dont need to change poland, czech, sweden or japan
+        'If tank.Contains("czech") Then
+        '    tank = tank.Replace("czech", "czech")
+        'End If
+
+        If tank.Contains(":") Then
+            Dim t = tank.Split(":")
+            tank = t(2)
+        End If
+        Dim f = scripts_pkg("scripts\item_defs\" + tank)
+        itemDefPathString = "scripts\item_defs\" + tank
+        If f Is Nothing Then
+            Return
+        End If
+        Dim ms As New MemoryStream
+        f.Extract(ms)
+        openXml_stream(ms, "nation")
+        ms.Dispose()
+        Dim docx = XDocument.Parse(TheXML_String)
+        itemDefXmlString = TheXML_String
+        Dim doc As New XmlDocument
+        Dim root_node As XmlNode = doc.CreateElement("model")
+
+        'this is going to be a mess :(
+
+        'see if there is a exclusionmask in this file.. means its the old SD style tank.
+        For Each exclusion In docx.Descendants("exclusionMask")
+            exclusionMask_id = -1
+            Dim exclu = doc.CreateElement("exclusionMask")
+            Dim excluName = doc.CreateElement("name")
+            excluName.InnerText = exclusion.Value.ToString.Replace("/", "\")
+            If excluName.InnerText.Length > 2 And excluName.InnerText.ToLower.Contains("_cm") Then
+                GLOBAL_exclusionMask = 1
+                exclu.AppendChild(excluName)
+                root_node.AppendChild(exclu)
+            End If
+        Next
+
+        Dim wotRootNode = docx.Element("map_nation")
+
+        get_hull_from_xml(wotRootNode, doc, root_node)
+        get_chassis_from_xml(wotRootNode, doc, root_node)
+        get_turrets_from_xml(wotRootNode, doc, root_node)
+
+        doc.AppendChild(root_node)
+
+        Try
+
+            Dim track = doc.CreateElement("track_info")
+            Dim cnt = 1
+            Dim spline_ = docx.Descendants("splineDesc")
+            Dim segr = spline_.Descendants("segmentModelRight")
+            Dim segl = spline_.Descendants("segmentModelLeft")
+            Dim segleftname = doc.CreateElement("left_filename")
+            Dim segrightname = doc.CreateElement("right_filename")
+            segleftname.InnerText = segl.Value.ToString
+            segrightname.InnerText = segr.Value.ToString
+            track.AppendChild(segleftname)
+            track.AppendChild(segrightname)
+
+            If xDoc.OuterXml.Contains("segment2Model") Then
+                Dim segr2 = spline_.Descendants("segment2ModelRight")
+                Dim segl2 = spline_.Descendants("segment2ModelLeft")
+                Dim segleftname2 = doc.CreateElement("left2_filename")
+                Dim segrightname2 = doc.CreateElement("right2_filename")
+                segleftname2.InnerText = segl2.Value.ToString
+                segrightname2.InnerText = segr2.Value.ToString
+                track.AppendChild(segleftname2)
+                track.AppendChild(segrightname2)
+                cnt = 2
+
+
+            End If
+            'add seg cnt
+            Dim seg_cnt = doc.CreateElement("seg_cnt")
+            seg_cnt.InnerText = cnt.ToString
+            track.AppendChild(seg_cnt)
+
+            'get seglength and seg offsets
+            Dim seg_ = docx.Descendants("segmentLength")
+            Dim seg_length = doc.CreateElement("segment_length")
+            seg_length.InnerText = seg_.Value.ToString
+            track.AppendChild(seg_length)
+            Dim segoffset = docx.Descendants("segmentOffset")
+            Dim seg_off = doc.CreateElement("segmentOffset")
+            seg_off.InnerText = segoffset.Value.ToString
+            track.AppendChild(seg_off)
+
+            If xDoc.OuterXml.Contains("segment2Offset") Then
+                Dim segoffset2 = docx.Descendants("segment2Offset")
+                Dim seg_off2 = doc.CreateElement("segment2Offset")
+                seg_off2.InnerText = segoffset2.Value.ToString
+                track.AppendChild(seg_off2)
+
+            End If
+
+            root_node.AppendChild(track)
+
+        Catch ex As Exception
+
+        End Try
+
+        Dim fm As New MemoryStream
+        doc.Save(fm)
+        fm.Position = 0
+        Dim data_set As New DataSet
+        data_set.ReadXml(fm)
+
+        fm.Dispose()
+
+        ms.Dispose()
+    End Sub
+
+    Private Sub get_hull_from_xml(ByRef wotRootNode As XElement, ByRef doc As XmlDocument, ByRef parentNode As XmlElement)
+        Dim wotHullElement = wotRootNode.Element("hull")
+
+        Dim wotHullModels = wotHullElement.Element("models")
+        Dim wotUndamaged = wotHullModels.Element("undamaged")
+        Dim wotCrashed = wotHullModels.Element("destroyed")
+
+        Dim wotCamo = wotHullElement.Element("camouflage")
+        Dim wotTiling = wotCamo.Element("tiling")
+
+        Dim hull = doc.CreateElement("hull")
+        Dim undamagedPath = doc.CreateElement("undamagedPath")
+        undamagedPath.InnerText = wotUndamaged.Value.Replace("/", "\")
+
+        Dim crashedPath = doc.CreateElement("crashedPath")
+        crashedPath.InnerText = wotCrashed.Value.Replace("/", "\")
+
+        Dim tiling = doc.CreateElement("tiling")
+        If (wotTiling IsNot Nothing) Then
+            tiling.InnerText = wotTiling.Value
+        Else
+            tiling.InnerText = ""
+        End If
+
+        hull.AppendChild(undamagedPath)
+        hull.AppendChild(crashedPath)
+        hull.AppendChild(tiling)
+
+        parentNode.AppendChild(hull)
+    End Sub
+
+    Private Sub get_chassis_from_xml(ByRef wotRootNode As XElement, ByRef doc As XmlDocument, ByRef parentNode As XmlElement)
+        Dim wotChassisElement = wotRootNode.Element("chassis")
+
+        For Each element In wotChassisElement.Elements()
+            Dim models = element.Element("models")
+            Dim undamaged = models.Element("undamaged")
+            Dim crashed = models.Element("destroyed")
+
+
+            Dim chassis = doc.CreateElement("chassis")
+            Dim name = doc.CreateElement("name")
+            name.InnerText = element.Name.ToString().Replace("_", " ").Trim()
+
+            Dim undamagedPath = doc.CreateElement("undamagedPath")
+            undamagedPath.InnerText = undamaged.Value.Replace("/", "\")
+
+            Dim crashedPath = doc.CreateElement("crashedPath")
+            crashedPath.InnerText = crashed.Value.Replace("/", "\")
+
+            chassis.AppendChild(name)
+            chassis.AppendChild(undamagedPath)
+            chassis.AppendChild(crashedPath)
+
+            parentNode.AppendChild(chassis)
+        Next
+    End Sub
+
+    Private Sub get_turrets_from_xml(ByRef wotRootNode As XElement, ByRef doc As XmlDocument, ByRef parentNode As XmlElement)
+        Dim turrets = wotRootNode.Element("turrets0")
+
+        For Each wotTurret In turrets.Elements()
+            Dim models = wotTurret.Element("models")
+            Dim undamaged = models.Element("undamaged")
+            Dim crashed = models.Element("destroyed")
+
+
+            Dim turret = doc.CreateElement("turret")
+            Dim name = doc.CreateElement("name")
+            name.InnerText = wotTurret.Name.ToString().Replace("_", " ").Trim()
+
+            Dim undamagedPath = doc.CreateElement("undamagedPath")
+            undamagedPath.InnerText = undamaged.Value.Replace("/", "\")
+
+            Dim crashedPath = doc.CreateElement("crashedPath")
+            crashedPath.InnerText = crashed.Value.Replace("/", "\")
+
+            turret.AppendChild(name)
+            turret.AppendChild(undamagedPath)
+            turret.AppendChild(crashedPath)
+
+            get_guns_from_xml(wotTurret, doc, turret)
+
+
+            parentNode.AppendChild(turret)
+        Next
+    End Sub
+
+    Private Sub get_guns_from_xml(ByRef wotParentNode As XElement, ByRef doc As XmlDocument, ByRef parentNode As XmlElement)
+        Dim guns = wotParentNode.Element("guns")
+
+        For Each wotGun In guns.Elements()
+            Dim models = wotGun.Element("models")
+            Dim undamaged = models.Element("undamaged")
+            Dim crashed = models.Element("destroyed")
+
+            Dim camo = wotGun.Element("camouflage")
+            Dim wotTiling = camo.Element("tiling")
+
+            Dim gun = doc.CreateElement("gun")
+            Dim name = doc.CreateElement("name")
+            name.InnerText = wotGun.Name.ToString().Replace("_", " ").Trim()
+
+            Dim undamagedPath = doc.CreateElement("undamagedPath")
+            undamagedPath.InnerText = undamaged.Value.Replace("/", "\")
+
+            Dim crashedPath = doc.CreateElement("crashedPath")
+            crashedPath.InnerText = crashed.Value.Replace("/", "\")
+
+            Dim tiling = doc.CreateElement("tiling")
+            If (wotTiling IsNot Nothing) Then
+                tiling.InnerText = wotTiling.Value
+            Else
+                tiling.InnerText = ""
+            End If
+
+            gun.AppendChild(name)
+            gun.AppendChild(undamagedPath)
+            gun.AppendChild(crashedPath)
+            gun.AppendChild(tiling)
+
+            parentNode.AppendChild(gun)
+        Next
     End Sub
 
     Private Sub load_tabs()
