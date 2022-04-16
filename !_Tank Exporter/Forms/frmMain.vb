@@ -5685,7 +5685,7 @@ fuckit:
         GC.WaitForFullGCComplete()
     End Sub
 
-    Private Function validate_path(ByVal name As String)
+    Public Function validate_path(ByVal name As String)
         If name Is Nothing Then Return "" ' trap dummy names
         Dim ent = packages(current_tank_package)(name)
         If ent IsNot Nothing Then
@@ -5783,10 +5783,11 @@ fuckit:
         '-------------------------------------------------------
         'Return
         'get take part paths from table
-        Dim turrets(10) As String
-        Dim guns(64) As String
-        Dim hulls(10) As String
-        Dim chassis(10) As String
+        Dim turrets As New List(Of String)
+        Dim guns As New List(Of String)
+        Dim hulls As New List(Of String)
+        Dim chassis As New List(Of String)
+
         ReDim hull_tile(10)
         ReDim gun_tile(64)
         ReDim turret_tile(10)
@@ -5855,14 +5856,13 @@ fuckit:
                  Select
             chass = row.Field(Of String)("chassis_name_Text")
         For Each thing In q2
-            chassis(cnt) = thing
+            chassis.Add(thing)
             cnt += 1
         Next
         If cnt = 0 Then
             bad_tanks.AppendLine(file_name)
             Return
         End If
-        ReDim Preserve chassis(cnt)
 
         cnt = 0
         tbl = t.Tables("gun_name")
@@ -5870,10 +5870,9 @@ fuckit:
              Select
             gn = row.Field(Of String)("gun_name_Text")
         For Each thing In q2
-            guns(cnt) = thing
+            guns.Add(thing)
             cnt += 1
         Next
-        ReDim Preserve guns(cnt)
 
         cnt = 0
         tbl = t.Tables("hull_name")
@@ -5881,10 +5880,9 @@ fuckit:
              Select
             hul = row.Field(Of String)("hull_name_Text")
         For Each thing In q2
-            hulls(cnt) = thing
+            hulls.Add(thing)
             cnt += 1
         Next
-        ReDim Preserve hulls(cnt)
 
         cnt = 0
         tbl = t.Tables("turret_name")
@@ -5892,79 +5890,21 @@ fuckit:
              Select
             tur = row.Field(Of String)("turret_name_Text")
         For Each thing In q2
-            turrets(cnt) = thing
+            turrets.Add(thing)
             cnt += 1
         Next
-        ReDim Preserve turrets(cnt)
 
         '-------------------------------------------------------
         '+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         'setup treeview and its nodes
         '+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         If Not save_tank Then
-            frmComponents.tv_guns.Nodes.Clear()
-            frmComponents.tv_turrets.Nodes.Clear()
-            frmComponents.tv_hulls.Nodes.Clear()
-            frmComponents.tv_chassis.Nodes.Clear()
+            frmComponents.turrets = turrets
+            frmComponents.guns = guns
+            frmComponents.hulls = hulls
+            frmComponents.chassis = chassis
 
-            Dim cn As Integer = 0
-            For i = 0 To guns.Length - 2
-                If validate_path(guns(i)) = guns(i) Then
-                    Dim n = New TreeNode
-
-                    n.Text = Path.GetFileNameWithoutExtension(guns(i))
-                    If guns(i).Contains("_skin") Then n.Text += " (Skin)"
-                    n.Tag = i
-                    frmComponents.tv_guns.Nodes.Add(n)
-                    cn += 1
-                End If
-            Next
-            frmComponents.tv_guns.SelectedNode = frmComponents.tv_guns.Nodes(0)
-            frmComponents.tv_guns.SelectedNode.Checked = True
-            '-------------------------------------------------------
-            cn = 0
-            For i = 0 To turrets.Length - 2
-                If validate_path(turrets(i)) = turrets(i) Then
-                    Dim n = New TreeNode
-                    n.Text = Path.GetFileNameWithoutExtension(turrets(i))
-                    If turrets(i).Contains("_skin") Then n.Text += " (Skin)"
-                    n.Tag = i
-                    frmComponents.tv_turrets.Nodes.Add(n)
-                    cn += 1
-                End If
-            Next
-            frmComponents.tv_turrets.SelectedNode = frmComponents.tv_turrets.Nodes(0)
-            frmComponents.tv_turrets.SelectedNode.Checked = True
-            '-------------------------------------------------------
-            cn = 0
-            For i = 0 To hulls.Length - 2
-                If validate_path(hulls(i)) = hulls(i) Then
-                    Dim n = New TreeNode
-                    n.Text = Path.GetFileNameWithoutExtension(hulls(i))
-                    If hulls(i).Contains("_skin") Then n.Text += " (Skin)"
-                    n.Tag = i
-                    frmComponents.tv_hulls.Nodes.Add(n)
-                    cn += 1
-                End If
-            Next
-            frmComponents.tv_hulls.SelectedNode = frmComponents.tv_hulls.Nodes(0)
-            frmComponents.tv_hulls.SelectedNode.Checked = True
-
-            '-------------------------------------------------------
-            cn = 0
-            For i = 0 To chassis.Length - 2
-                If validate_path(chassis(i)) = chassis(i) Then
-                    Dim n = New TreeNode
-                    n.Text = Path.GetFileNameWithoutExtension(chassis(i))
-                    If chassis(i).Contains("_skin") Then n.Text += " (Skin)"
-                    n.Tag = i
-                    frmComponents.tv_chassis.Nodes.Add(n)
-                    cn += 1
-                End If
-            Next
-            frmComponents.tv_chassis.SelectedNode = frmComponents.tv_chassis.Nodes(0)
-            frmComponents.tv_chassis.SelectedNode.Checked = True
-            '+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+            frmComponents.RefreshDisplay()
 
             '-------------------------------------------------------
             If frmFBX.Visible Then ' if fbx export form is visble, place the components form next to it
@@ -6246,7 +6186,7 @@ fuckit:
             file_name = turret_name
             LOAD_ERROR = LOAD_ERROR And build_primitive_data(True) ' -- turret
 
-            For gn = guns.Length - 2 To 0 Step -1
+            For gn = guns.Count - 1 To 0 Step -1
                 file_name = guns(gn)
                 gun_name = file_name
                 If LOAD_ERROR = LOAD_ERROR And build_primitive_data(True) Then ' -- gun
