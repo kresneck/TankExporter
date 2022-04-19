@@ -448,7 +448,7 @@ done:
 
         My.Settings.Upgrade() ' upgrades to keep old settings
 
-        Dim nonInvariantCulture As System.Globalization.CultureInfo = New CultureInfo("en-US")
+        Dim nonInvariantCulture As New CultureInfo("en-US")
         nonInvariantCulture.NumberFormat.NumberDecimalSeparator = "."
         System.Threading.Thread.CurrentThread.CurrentCulture = nonInvariantCulture
 
@@ -1822,19 +1822,20 @@ loaded_jump:
         Dim col = 0
         Dim row = 0
         For i = 0 To cnt - 1
-            Dim b As New Button
-            b.Width = 50
-            b.Height = 50
-            b.BackgroundImage = camo_images(i).bmp
-            b.ImageAlign = ContentAlignment.MiddleCenter
-            b.BackgroundImageLayout = ImageLayout.Stretch
-            AddHandler b.Click, AddressOf handle_imgbtn_click
             Dim p = New System.Drawing.Point(col * 50, row * 50)
-            b.Location = p
-            b.Tag = camo_images(i).id
-            b.Text = camo_images(i).id.ToString
-            b.Font = font_holder.Font
-            b.ForeColor = Color.White
+            Dim b As New Button With {
+                .Width = 50,
+                .Height = 50,
+                .BackgroundImage = camo_images(i).bmp,
+                .ImageAlign = ContentAlignment.MiddleCenter,
+                .BackgroundImageLayout = ImageLayout.Stretch,
+                .Location = p,
+                .Tag = camo_images(i).id,
+                .Text = camo_images(i).id.ToString,
+                .Font = font_holder.Font,
+                .ForeColor = Color.White
+           }
+            AddHandler b.Click, AddressOf handle_imgbtn_click
             FrmCamo.Controls.Add(b)
             col += 1
             If col > 9 Then
@@ -1868,7 +1869,7 @@ loaded_jump:
             Application.DoEvents()
             update_thread.Abort()
         End While
-        Dim f As DirectoryInfo = New DirectoryInfo(Temp_Storage)
+        Dim f As New DirectoryInfo(Temp_Storage)
         shared_contents_build.Dispose()
         packages(11).Dispose()
         GC.Collect()
@@ -1966,17 +1967,20 @@ loaded_jump:
         Dim st_index = TC1.SelectedIndex
         Dim st = TC1.SelectedTab
         start_up_log.AppendLine("Creating TreeView :" + st_index.ToString("00"))
-        tv = New mytreeview
-        tv.Font = font_holder.Font.Clone
-        tv.ContextMenuStrip = conMenu
-        tv.DrawMode = TreeViewDrawMode.OwnerDrawText
-        tv.ImageList = tank_mini_icons
-        tv.Dock = DockStyle.Fill
+        tv = New mytreeview With {
+            .Font = font_holder.Font.Clone,
+            .ContextMenuStrip = conMenu,
+            .DrawMode = TreeViewDrawMode.OwnerDrawText,
+            .ImageList = tank_mini_icons,
+            .Dock = DockStyle.Fill,
+            .BackColor = Color.DimGray,
+            .ForeColor = Color.Black,
+            .HotTracking = False,
+            .HideSelection = True
+        }
+
         tv.Nodes.Clear()
-        tv.BackColor = Color.DimGray
-        tv.ForeColor = Color.Black
-        tv.HotTracking = False
-        tv.HideSelection = True
+
         st.Controls.Add(tv)
         If st_index < 9 Then
             TC1.SelectedIndex = st_index + 1
@@ -2475,9 +2479,10 @@ loaded_jump:
                 node_list(i).item(cnt).name = t.tag
                 node_list(i).item(cnt).node = n
                 node_list(i).item(cnt).package = packages(i).Name
-                icons(i).img(cnt) = New entry_
-                icons(i).img(cnt).img = get_tank_icon(t.nation, n.Text).Clone
-                icons(i).img(cnt).name = t.tag
+                icons(i).img(cnt) = New entry_ With {
+                    .img = get_tank_icon(t.nation, n.Text).Clone,
+                    .name = t.tag
+                }
                 If icons(i).img(cnt) IsNot Nothing Then
                     node_list(i).item(cnt).icon = icons(i).img(cnt).img.Clone
                     node_list(i).item(cnt).icon.Tag = current_png_path
@@ -3522,7 +3527,7 @@ loaded_jump:
             If m_show_fbx.Checked Then
                 For i = 0 To fbx_boneGroups.Length - 1
                     For z = 0 To fbx_boneGroups(i).nodeCnt - 1
-                        If Not fbx_boneGroups(i).node_matrices(z).mat Is Nothing Then
+                        If fbx_boneGroups(i).node_matrices(z).mat IsNot Nothing Then
                             Gl.glPushMatrix()
                             Gl.glMultMatrixd(fbx_boneGroups(i).node_matrices(z).mat)
                             v_color = fbx_boneGroups(i).models(z).color
@@ -4473,11 +4478,13 @@ fuckit:
 
     End Sub
     Private Sub draw_pan_arrows()
-        Dim p As New Point
-        p.Y = -pb1.Height + 77 + 72
         Dim center = pb1.Width / 2
         Dim c_off As Integer = 75
-        p.X = center + c_off
+
+        Dim p As New Point With {
+            .Y = -pb1.Height + 77 + 72,
+            .X = center + c_off
+        }
         Gl.glEnable(Gl.GL_TEXTURE_2D)
         Gl.glActiveTexture(Gl.GL_TEXTURE0)
         Gl.glEnable(Gl.GL_LIGHTING)
@@ -4533,11 +4540,13 @@ fuckit:
         Gl.glDisable(Gl.GL_CULL_FACE)
         Gl.glPolygonMode(Gl.GL_FRONT_AND_BACK, Gl.GL_FILL)
 
-        Dim p As New Point
-        p.Y = -pb1.Height + 77 + 72
         Dim center = pb1.Width / 2
         Dim c_off As Integer = 75
-        p.X = center - c_off
+
+        Dim p As New Point With {
+            .Y = -pb1.Height + 77 + 72,
+            .X = center - c_off
+        }
 
         'left side
         Gl.glColor3ub(2, 0, 0)
@@ -5157,9 +5166,10 @@ fuckit:
             Return
         End If
         If upton.state = 102 And M_DOWN Then
-            Dim delta As New Point
-            delta.X = mouse.x - m_mouse.x
-            delta.Y = mouse.y - m_mouse.y
+            Dim delta As New Point With {
+                .X = mouse.x - m_mouse.x,
+                .Y = mouse.y - m_mouse.y
+            }
             upton.position.X -= delta.X
             upton.position.Y += delta.Y
             mouse.x = m_mouse.x
@@ -5842,9 +5852,9 @@ fuckit:
         'see if this is the old style tanks
         If GLOBAL_exclusionMask = 1 Then
             Dim et = t.Tables("exclusionMask")
-            Dim eq = From row In et.AsEnumerable _
-                        Select _
-                        na = row.Field(Of String)("name")
+            Dim eq = From row In et.AsEnumerable
+                     Select
+                     na = row.Field(Of String)("name")
             exclusionMask_name = eq(0)
             Dim en = packages(current_tank_package)(exclusionMask_name)
             Dim ms As New MemoryStream
@@ -5865,7 +5875,7 @@ fuckit:
         '-------------------------------------------------------
         'Return
         'get take part paths from table
-        Dim turretz As New List(Of TurretComponent)
+        Dim turrets As New List(Of TurretComponent)
         Dim hulls As New List(Of Component)
         Dim chassis As New List(Of Component)
 
@@ -5879,12 +5889,12 @@ fuckit:
             crashedPath = row.Field(Of String)("crashedPath")
 
         For Each result In q1
-            Dim item As New Component
-
-            item.name = result.name
-            item.undamagedPath = result.undamagedPath
-            item.crashedPath = result.crashedPath
-            item.tiling = ""
+            Dim item As New Component With {
+                .name = result.name,
+                .undamagedPath = result.undamagedPath,
+                .crashedPath = result.crashedPath,
+                .tiling = ""
+            }
 
             chassis.Add(item)
         Next
@@ -5901,13 +5911,12 @@ fuckit:
             tiling = row.Field(Of String)("tiling")
 
         For Each result In q3
-            Dim item As New Component
-
-            item.name = "Hull"
-            item.undamagedPath = result.undamagedPath
-            item.crashedPath = result.crashedPath
-            item.tiling = result.tiling
-
+            Dim item As New Component With {
+                .name = "Hull",
+                .undamagedPath = result.undamagedPath,
+                .crashedPath = result.crashedPath,
+                .tiling = result.tiling
+            }
             hulls.Add(item)
         Next
 
@@ -5935,27 +5944,25 @@ fuckit:
 
 
             For Each gunResult In gunQ
-                Dim gun As New Component
-
-                gun.name = gunResult.name
-                gun.undamagedPath = gunResult.undamagedPath
-                gun.crashedPath = gunResult.crashedPath
-                gun.tiling = gunResult.tiling
-
+                Dim gun As New Component With {
+                    .name = gunResult.name,
+                    .undamagedPath = gunResult.undamagedPath,
+                    .crashedPath = gunResult.crashedPath,
+                    .tiling = gunResult.tiling
+                }
                 guns.Add(gun)
             Next
 
 
-            Dim item As New TurretComponent
+            Dim item As New TurretComponent With {
+                .name = result.name,
+                .undamagedPath = result.undamagedPath,
+                .crashedPath = result.crashedPath,
+                .tiling = result.tiling,
+                .gunList = guns
+            }
 
-            item.name = result.name
-            item.undamagedPath = result.undamagedPath
-            item.crashedPath = result.crashedPath
-            item.tiling = result.tiling
-            item.gunList = guns
-
-
-            turretz.Add(item)
+            turrets.Add(item)
         Next
 
         '-------------------------------------------------------
@@ -5963,7 +5970,7 @@ fuckit:
         'setup treeview and its nodes
         '+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         If Not save_tank Then
-            frmComponents.turrets = turretz
+            frmComponents.turrets = turrets
             frmComponents.hulls = hulls
             frmComponents.chassis = chassis
 
@@ -5980,27 +5987,46 @@ fuckit:
 
 
 
-            If (frmComponents.ShowDialog(Me) <> DialogResult.OK) Then
-                Return
+            If (frmComponents.ShowDialog(Me) = DialogResult.OK) Then
+                displayTank(frmComponents.selectedChassis, frmComponents.selectedHull, frmComponents.selectedTurret, frmComponents.selectedGun, ar, t)
             End If
+
 
 
             If frmFBX.Visible Then
-                    frmFBX.Location = Me.Location
-                End If
+                frmFBX.Location = Me.Location
             End If
+        Else
+            displayTank(chassis(0), hulls(0), turrets(0), turrets(0).gunList(0), ar, t)
+        End If
 
-            '-------------------------------------------------------
+
+        t.Dispose()
+
+        '-------------------------------------------------------
+    End Sub
+
+    Private Sub displayTank(ByRef chassis As Component, ByRef hull As Component, ByRef turret As TurretComponent, ByRef gun As Component, ByRef ar As String(), ByRef t As DataSet)
+
+        Dim turretPath, turretTiling, hullPath, hullTiling, gunPath, gunTiling, chassisPath As String
 
 
-            Dim turretPath As String
-        turretPath = frmComponents.selectedTurret.undamagedPath
+        turretPath = turret.undamagedPath
+        turretTiling = turret.tiling
+
+        hullPath = hull.undamagedPath
+        hullTiling = hull.tiling
+
+        gunPath = gun.undamagedPath
+        gunTiling = gun.tiling
+
+        chassisPath = chassis.undamagedPath
 
 
         turret_tiling = New vect4
 
 
-        Dim tt = frmComponents.selectedTurret.tiling.Split(" ")
+        Dim tt = turretTiling.Split(" ")
         If tt.Length = 1 Then
             ReDim tt(4)
             tt(0) = "1"
@@ -6021,9 +6047,7 @@ fuckit:
         '    'turret_tiling = turret_tile(turrets.Length - 2)
         'End Try
 
-        Dim hullPath = frmComponents.selectedHull.undamagedPath
-
-        Dim ht = frmComponents.selectedHull.tiling.Split(" ")
+        Dim ht = hullTiling.Split(" ")
         If ht.Length = 1 Then
             ReDim ht(4)
             ht(0) = "1"
@@ -6032,19 +6056,16 @@ fuckit:
             ht(3) = "0"
         End If
 
-        hull_tiling = New vect4
+        hull_tiling = New vect4 With {
+            .x = CSng(ht(0)),
+            .y = CSng(ht(1)),
+            .z = CSng(ht(2)),
+            .w = CSng(ht(3))
+        }
 
-        hull_tiling.x = CSng(ht(0))
-        hull_tiling.y = CSng(ht(1))
-        hull_tiling.z = CSng(ht(2))
-        hull_tiling.w = CSng(ht(3))
-
-        Dim chassis_name = frmComponents.selectedChassis.undamagedPath
-
-        Dim gun_name As String = ""
         Dim ti, tj As New vect4
-        gun_name = frmComponents.selectedGun.undamagedPath
-        Dim gt = frmComponents.selectedGun.tiling.Split(" ")
+
+        Dim gt = gunTiling.Split(" ")
         If gt.Length = 1 Then
             ReDim gt(4)
             gt(0) = "1"
@@ -6053,12 +6074,12 @@ fuckit:
             gt(3) = "0"
         End If
 
-        ti = New vect4
-        ti.x = CSng(gt(0))
-        ti.y = CSng(gt(1))
-        ti.z = CSng(gt(2))
-        ti.w = CSng(gt(3))
-
+        ti = New vect4 With {
+            .x = CSng(gt(0)),
+            .y = CSng(gt(1)),
+            .z = CSng(gt(2)),
+            .w = CSng(gt(3))
+        }
         tj = ti
         tj.w = ti.z
         tj.z = ti.w
@@ -6137,7 +6158,7 @@ fuckit:
         If TESTING Then
 
             'test stuff to grab track stuff
-            tbl = t.Tables("track_info")
+            Dim tbl = t.Tables("track_info")
             Dim tkq = From row In tbl.AsEnumerable
                       Select
                         seg_cnt = row.Field(Of String)("seg_cnt")
@@ -6183,7 +6204,7 @@ fuckit:
 
 
 
-            Dim tra() = chassis_name.Split("/")
+            Dim tra() = chassisPath.Split("/")
             Dim track_path = Path.GetDirectoryName(track_info.left_path1) + "\right.track"
             Dim tent = packages(current_tank_package)(track_path)
             Dim t_data As New DataSet
@@ -6265,7 +6286,7 @@ fuckit:
 
 
         loaded_from_resmods = False
-        file_name = chassis_name
+        file_name = chassisPath
         Dim LOAD_ERROR As Boolean = True
 
         LOAD_ERROR = LOAD_ERROR And build_primitive_data(False) ' -- chassis
@@ -6275,31 +6296,13 @@ fuckit:
         LOAD_ERROR = LOAD_ERROR And build_primitive_data(True) ' -- hull
         If stop_updating Then draw_scene()
 
-        If WRITE_FBX_NOW Then
+        file_name = turretPath
+        LOAD_ERROR = LOAD_ERROR And build_primitive_data(True) ' -- turret
+        If stop_updating Then draw_scene()
 
-            file_name = turretPath
-            LOAD_ERROR = LOAD_ERROR And build_primitive_data(True) ' -- turret
-
-            '            For gn = guns.Count - 1 To 0 Step -1
-            '           file_name = guns(gn).undamagedPath
-            '          gun_name = file_name
-            '         If LOAD_ERROR = LOAD_ERROR And build_primitive_data(True) Then ' -- gun
-            '        If stop_updating Then draw_scene()
-            '       Exit For
-            '  End If
-
-            '      Next
-        Else
-            file_name = frmComponents.selectedTurret.undamagedPath
-            LOAD_ERROR = LOAD_ERROR And build_primitive_data(True) ' -- turret
-            If stop_updating Then draw_scene()
-
-            file_name = frmComponents.selectedGun.undamagedPath
-            LOAD_ERROR = LOAD_ERROR And build_primitive_data(True) ' -- gun
-            If stop_updating Then draw_scene()
-
-        End If
-
+        file_name = gunPath
+        LOAD_ERROR = LOAD_ERROR And build_primitive_data(True) ' -- gun
+        If stop_updating Then draw_scene()
 
         If TESTING Then
             file_name = track_info.left_path1
@@ -6430,9 +6433,9 @@ fuckit:
             Dim rotation_limit As Single = 0.0
             'ver 1
             Dim s1 = "File format: 1 INT32 as version, INT32 as chassis and hull vertex count, INT32 as turret vertex count, INT32 as Gun vertex Count."
-            Dim s2 = "3 Floats turret pivot center XYZ, " + _
+            Dim s2 = "3 Floats turret pivot center XYZ, " +
                     "2 Floats rotation limits L&R,"
-            Dim s3 = "3 Floats gun pivot point XYZ , 2 Floats gun limits U&D, " + _
+            Dim s3 = "3 Floats gun pivot point XYZ , 2 Floats gun limits U&D, " +
                     "6 Floats as list of vertices:Each being (position XYZ Normal XYZ), "
             Dim s4 = "9 Floats for future use."
             fw.Write(s1)
@@ -6488,8 +6491,6 @@ fuckit:
 
             fo.Close()
         End If
-        t.Dispose()
-        tbl.Dispose()
         GC.Collect()
         If FBX_LOADED Then
             m_show_fbx.Visible = True
@@ -8366,17 +8367,18 @@ skip_old_way:
     Private Sub m_sel_texture_Click(sender As Object, e As EventArgs) Handles m_sel_texture.Click
         If current_decal < 0 Then Return
         If t_list Is Nothing Then ' create text box and fill it with all the texture names if it hasn't been created already.
-            t_list = New TextBox
-            t_list.Multiline = True
-            t_list.Parent = decal_panel
-            t_list.Width = d_list_tb.Width
-            t_list.Height = d_list_tb.Height
-            t_list.Location = d_list_tb.Location
-            t_list.Anchor = AnchorStyles.Bottom Or AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
-            t_list.ForeColor = d_list_tb.ForeColor
-            t_list.BackColor = d_list_tb.BackColor
-            t_list.Font = d_list_tb.Font
-            t_list.ScrollBars = ScrollBars.Vertical
+            t_list = New TextBox With {
+                .Multiline = True,
+                .Parent = decal_panel,
+                .Width = d_list_tb.Width,
+                .Height = d_list_tb.Height,
+                .Location = d_list_tb.Location,
+                .Anchor = AnchorStyles.Bottom Or AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right,
+                .ForeColor = d_list_tb.ForeColor,
+                .BackColor = d_list_tb.BackColor,
+                .Font = d_list_tb.Font,
+                .ScrollBars = ScrollBars.Vertical
+            }
             For j = 0 To decal_textures.Length - 1
                 t_list.Text += decal_textures(j).colorMap_name + " :" + j.ToString + vbCrLf
             Next
@@ -9608,9 +9610,10 @@ load_script:
         If File.Exists(f_script) Then
             File.Delete(f_script)
         End If
-        Dim wotmod_model As New Ionic.Zip.ZipFile(f_model)
-        wotmod_model.CompressionLevel = Ionic.Zlib.CompressionLevel.None
-        wotmod_model.Encryption = EncryptionAlgorithm.None
+        Dim wotmod_model As New Ionic.Zip.ZipFile(f_model) With {
+            .CompressionLevel = Ionic.Zlib.CompressionLevel.None,
+            .Encryption = EncryptionAlgorithm.None
+        }
 
         Dim wotmod_scripts As New Ionic.Zip.ZipFile(f_script)
         Dim scripts_exist As Boolean = False
@@ -9696,16 +9699,17 @@ load_script:
         'save the meta.xml
         File.WriteAllText(My.Settings.res_mods_path + "\temp\res\meta.xml", meta)
 
-        Dim ps As New ProcessStartInfo
-        ps.FileName = Application.StartupPath + "\" + "7za.exe"
-        ps.Arguments = " a -tzip " + f_model + " " + My.Settings.res_mods_path + "\temp\res\" + " -r -mx0"
+        Dim ps As New ProcessStartInfo With {
+            .FileName = Application.StartupPath + "\" + "7za.exe",
+            .Arguments = " a -tzip " + f_model + " " + My.Settings.res_mods_path + "\temp\res\" + " -r -mx0"
+        }
 
         Dim r = Process.Start(ps)
         r.WaitForExit()
-        Dim ps2 As New ProcessStartInfo
-        ps2.FileName = Application.StartupPath + "\" + "7za.exe"
-        ps2.Arguments = " rn " + f_model + " res\meta.xml meta.xml" + "  "
-
+        Dim ps2 As New ProcessStartInfo With {
+            .FileName = Application.StartupPath + "\" + "7za.exe",
+            .Arguments = " rn " + f_model + " res\meta.xml meta.xml" + "  "
+        }
         Dim r2 = Process.Start(ps2)
         r2.WaitForExit()
 
