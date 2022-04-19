@@ -241,13 +241,14 @@ Module WOT_Dev_interface
         'turrets = clean_file(in_turrets)
         ReDim tank_list(tags.Length)
         For i = 0 To tags.Length - 1
-            tank_list(i) = New tankitem_
-            tank_list(i).path = tags(i)
-            tank_list(i).tier = tiers(i)
-            tank_list(i).short_name = shortnames(i)
-            tank_list(i).nation = nations(i)
-            tank_list(i).type = types(i)
-            tank_list(i).id = ids(i)
+            tank_list(i) = New tankitem_ With {
+                .path = tags(i),
+                .tier = tiers(i),
+                .short_name = shortnames(i),
+                .nation = nations(i),
+                .type = types(i),
+                .id = ids(i)
+            }
             'tank_list(i).turrets = turrets(i)
         Next
     End Sub

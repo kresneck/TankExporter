@@ -47,12 +47,11 @@ Module vis_main
 
         Try
             'point the xtw at the StringWriter
-
-            xtw = New XmlTextWriter(sw)
-
             'we want the output formatted
 
-            xtw.Formatting = Formatting.Indented
+            xtw = New XmlTextWriter(sw) With {
+                .Formatting = Formatting.Indented
+            }
 
             'get the dom to dump its contents into the xtw 
 
@@ -211,13 +210,14 @@ remove_more:
         XML = fix_bad_tags(XML)
         Dim MS As New MemoryStream()
 
-        Dim xmlsettings As New XmlWriterSettings
-        xmlsettings.Indent = True
-        xmlsettings.NewLineOnAttributes = True
-        xmlsettings.Encoding = Encoding.UTF8
-        xmlsettings.OmitXmlDeclaration = True
-        xmlsettings.CheckCharacters = True
-        xmlsettings.CloseOutput = True
+        Dim xmlsettings As New XmlWriterSettings With {
+            .Indent = True,
+            .NewLineOnAttributes = True,
+            .Encoding = Encoding.UTF8,
+            .OmitXmlDeclaration = True,
+            .CheckCharacters = True,
+            .CloseOutput = True
+        }
         Dim W = XmlWriter.Create(MS, xmlsettings)
         Dim D As New XmlDocument()
         Try

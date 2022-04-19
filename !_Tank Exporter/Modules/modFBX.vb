@@ -485,7 +485,6 @@ outofhere:
         Dim mat_main As String = ""
         Dim mat_NM As String = ""
         Dim mat_uv2 As String = ""
-        Dim fbx_locaction As String = My.Settings.fbx_path
         Dim rp As String = Application.StartupPath
         Dim _date As String = Date.Now
         Dim ar = _date.Split(" ")
@@ -1054,10 +1053,11 @@ outahere:
         Dim fbx_matrix As New FbxXMatrix
         fbxgrp(i).rotation = New FbxVector4
         fbxgrp(i).translation = New FbxVector4
-        fbxgrp(i).scale = New FbxVector4
-        fbxgrp(i).scale.X = 1.0
-        fbxgrp(i).scale.Y = 1.0
-        fbxgrp(i).scale.Z = 1.0
+        fbxgrp(i).scale = New FbxVector4 With {
+            .X = 1.0,
+            .Y = 1.0,
+            .Z = 1.0
+        }
 
         Dim t As New FbxTime
         Dim GlobalUnitScale = scene.GlobalSettings.FindProperty("UnitScaleFactor", False).GetValueAsDouble
@@ -1230,11 +1230,11 @@ outahere:
         Dim fbx_matrix As New FbxXMatrix
         fbxgrp(i).rotation = New FbxVector4
         fbxgrp(i).translation = New FbxVector4
-        fbxgrp(i).scale = New FbxVector4
-        fbxgrp(i).scale.X = 1.0
-        fbxgrp(i).scale.Y = 1.0
-        fbxgrp(i).scale.Z = 1.0
-
+        fbxgrp(i).scale = New FbxVector4 With {
+            .X = 1.0,
+            .Y = 1.0,
+            .Z = 1.0
+        }
         Dim t As New FbxTime
         Dim GlobalUnitScale = scene.GlobalSettings.FindProperty("UnitScaleFactor", False).GetValueAsDouble
 
@@ -1540,25 +1540,24 @@ outahere:
         get_component_index() 'build indexing table
     End Sub
     Private Sub move_fbx_entry(ByRef fbx_in As _grps, ByRef fbx_out As _grps, ByVal i As Integer, ByVal idx As Integer)
-        fbx_in = New _grps
-
-        fbx_in.name = fbx_out.name
-        fbx_in.color_name = fbx_out.color_name
-        fbx_in.color_Id = fbx_out.color_Id
-        fbx_in.normal_name = fbx_out.normal_name
-        fbx_in.normal_Id = fbx_out.normal_Id
-        fbx_in.call_list = fbx_out.call_list
-        fbx_in.nPrimitives_ = fbx_out.nPrimitives_
-        fbx_in.nVertices_ = fbx_out.nVertices_
-        fbx_in.startIndex_ = fbx_out.startIndex_
-        fbx_in.startVertex_ = fbx_out.startVertex_
-        fbx_in.specular_name = fbx_out.specular_name
-        fbx_in.specular_id = fbx_out.specular_id
-        fbx_in.texture_count = fbx_out.texture_count
-        fbx_in.has_uv2 = fbx_out.has_uv2
-        fbx_in.has_Vcolor = fbx_out.has_Vcolor
-        fbx_in.bumped = fbx_out.bumped
-
+        fbx_in = New _grps With {
+            .name = fbx_out.name,
+            .color_name = fbx_out.color_name,
+            .color_Id = fbx_out.color_Id,
+            .normal_name = fbx_out.normal_name,
+            .normal_Id = fbx_out.normal_Id,
+            .call_list = fbx_out.call_list,
+            .nPrimitives_ = fbx_out.nPrimitives_,
+            .nVertices_ = fbx_out.nVertices_,
+            .startIndex_ = fbx_out.startIndex_,
+            .startVertex_ = fbx_out.startVertex_,
+            .specular_name = fbx_out.specular_name,
+            .specular_id = fbx_out.specular_id,
+            .texture_count = fbx_out.texture_count,
+            .has_uv2 = fbx_out.has_uv2,
+            .has_Vcolor = fbx_out.has_Vcolor,
+            .bumped = fbx_out.bumped
+        }
 
         ReDim fbx_in.matrix(15)
         For j = 0 To 15
@@ -1566,50 +1565,41 @@ outahere:
         Next
         ReDim fbx_in.vertices(fbx_out.vertices.Length - 1)
         For j = 0 To fbx_out.vertices.Length - 1
-            fbx_in.vertices(j) = New vertice_
-            fbx_in.vertices(j).index_1 = fbx_out.vertices(j).index_1
-            fbx_in.vertices(j).index_2 = fbx_out.vertices(j).index_2
-            fbx_in.vertices(j).index_3 = fbx_out.vertices(j).index_3
-            fbx_in.vertices(j).index_4 = fbx_out.vertices(j).index_4
-
-            fbx_in.vertices(j).n = fbx_out.vertices(j).n
-
-            fbx_in.vertices(j).x = fbx_out.vertices(j).x
-            fbx_in.vertices(j).y = fbx_out.vertices(j).y
-            fbx_in.vertices(j).z = fbx_out.vertices(j).z
-
-            fbx_in.vertices(j).nx = fbx_out.vertices(j).nx
-            fbx_in.vertices(j).ny = fbx_out.vertices(j).ny
-            fbx_in.vertices(j).nz = fbx_out.vertices(j).nz
-
-            fbx_in.vertices(j).n = fbx_out.vertices(j).n
-            fbx_in.vertices(j).t = fbx_out.vertices(j).t
-            fbx_in.vertices(j).bn = fbx_out.vertices(j).bn
-
-            fbx_in.vertices(j).u = fbx_out.vertices(j).u
-            fbx_in.vertices(j).v = fbx_out.vertices(j).v
-
-            fbx_in.vertices(j).u2 = fbx_out.vertices(j).u2
-            fbx_in.vertices(j).v2 = fbx_out.vertices(j).v2
-
-            fbx_in.vertices(j).r = fbx_out.vertices(j).r
-            fbx_in.vertices(j).g = fbx_out.vertices(j).g
-            fbx_in.vertices(j).b = fbx_out.vertices(j).b
-            fbx_in.vertices(j).a = fbx_out.vertices(j).a
-
-            fbx_in.vertices(j).bnx = fbx_out.vertices(j).bnx
-            fbx_in.vertices(j).bny = fbx_out.vertices(j).bny
-            fbx_in.vertices(j).bnz = fbx_out.vertices(j).bnz
-
-            fbx_in.vertices(j).tx = fbx_out.vertices(j).tx
-            fbx_in.vertices(j).ty = fbx_out.vertices(j).ty
-            fbx_in.vertices(j).tz = fbx_out.vertices(j).tz
-
+            fbx_in.vertices(j) = New vertice_ With {
+                .index_1 = fbx_out.vertices(j).index_1,
+                .index_2 = fbx_out.vertices(j).index_2,
+                .index_3 = fbx_out.vertices(j).index_3,
+                .index_4 = fbx_out.vertices(j).index_4,
+                .n = fbx_out.vertices(j).n,
+                .x = fbx_out.vertices(j).x,
+                .y = fbx_out.vertices(j).y,
+                .z = fbx_out.vertices(j).z,
+                .nx = fbx_out.vertices(j).nx,
+                .ny = fbx_out.vertices(j).ny,
+                .nz = fbx_out.vertices(j).nz,
+                .t = fbx_out.vertices(j).t,
+                .bn = fbx_out.vertices(j).bn,
+                .u = fbx_out.vertices(j).u,
+                .v = fbx_out.vertices(j).v,
+                .u2 = fbx_out.vertices(j).u2,
+                .v2 = fbx_out.vertices(j).v2,
+                .r = fbx_out.vertices(j).r,
+                .g = fbx_out.vertices(j).g,
+                .b = fbx_out.vertices(j).b,
+                .a = fbx_out.vertices(j).a,
+                .bnx = fbx_out.vertices(j).bnx,
+                .bny = fbx_out.vertices(j).bny,
+                .bnz = fbx_out.vertices(j).bnz,
+                .tx = fbx_out.vertices(j).tx,
+                .ty = fbx_out.vertices(j).ty,
+                .tz = fbx_out.vertices(j).tz
+            }
         Next
         ReDim fbx_in.indicies(fbx_out.indicies.Length - 1)
         For j = 0 To fbx_out.indicies.Length - 1
-            fbx_in.indicies(j) = New uvect3
-            fbx_in.indicies(j).v1 = fbx_out.indicies(j).v1
+            fbx_in.indicies(j) = New uvect3 With {
+                .v1 = fbx_out.indicies(j).v1
+            }
             'fbx_in.indicies(j).v2 = fbx_out.indicies(j).v2
             'fbx_in.indicies(j).v3 = fbx_out.indicies(j).v3
         Next
@@ -2053,11 +2043,11 @@ whichone:
 
             Dim Dir = Vector3.Cross(v2 - v1, v3 - v1)
             Dim n = Vector3.Normalize(Dir)
-            Dim n2 As New FbxVector4
-            n2.X = n.X
-            n2.Y = n.Y
-            n2.Z = n.Z
-
+            Dim n2 As New FbxVector4 With {
+                .X = n.X,
+                .Y = n.Y,
+                .Z = n.Z
+            }
 
             fbxgrp(i).vertices(p1).nx = n.X
             fbxgrp(i).vertices(p1).ny = n.Y
@@ -3108,9 +3098,10 @@ whichone:
         If len = 0.0F Then len = 1.0F
 
         'reduce to unit size
-        p.nx = (p.nx / len)
-        p.ny = (p.ny / len)
-        p.nz = (p.nz / len)
+        p.nx /= len
+        p.ny /= len
+        p.nz /= len
+
         Return p
     End Function
 

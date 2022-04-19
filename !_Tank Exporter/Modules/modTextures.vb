@@ -1780,7 +1780,7 @@ skip_hd:
             Gl.glFinish()
             Gl.glBindTexture(Gl.GL_TEXTURE_2D, 0)
 
-            Dim rect As Rectangle = New Rectangle(0, 0, width, height)
+            Dim rect As New Rectangle(0, 0, width, height)
 
             ' Create the bitmap.
             bmp = New System.Drawing.Bitmap(width, height, PixelFormat.Format24bppRgb)
@@ -1828,7 +1828,7 @@ skip_hd:
 
             ' Create the bitmap.
             Dim Bitmapi = New System.Drawing.Bitmap(width, height, PixelFormat.Format32bppArgb)
-            Dim rect As Rectangle = New Rectangle(0, 0, width, height)
+            Dim rect As New Rectangle(0, 0, width, height)
 
             ' Store the DevIL image data into the bitmap.
             Dim bitmapData As BitmapData = Bitmapi.LockBits(rect, ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb)
@@ -2186,7 +2186,7 @@ skip_hd:
 
             ' Create the bitmap.
             Dim Bitmapi = New System.Drawing.Bitmap(width, height, PixelFormat.Format32bppArgb)
-            Dim rect As Rectangle = New Rectangle(0, 0, width, height)
+            Dim rect As New Rectangle(0, 0, width, height)
 
             ' Store the DevIL image data into the bitmap.
             Dim bitmapData As BitmapData = Bitmapi.LockBits(rect, ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb)

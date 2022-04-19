@@ -598,7 +598,7 @@ Module ModTankLoader
 
         r.Dispose()
         '####################################################################################
-        Dim stream As MemoryStream = New MemoryStream(buf)
+        Dim stream As New MemoryStream(buf)
         b_reader = New BinaryReader(stream)
         'set data_heaps size
 
@@ -636,7 +636,7 @@ Module ModTankLoader
                 Dim sec_name_len As UInt32 = b_reader.ReadUInt32
                 'get this sections name
                 For read_at As UInteger = 1 To sec_name_len
-                    na = na & b_reader.ReadChar
+                    na &= b_reader.ReadChar
                 Next
                 section_names(xmlget_mode).names(i) = na.Trim
 
@@ -803,7 +803,7 @@ next_m:
                 If cr = 0 Then dr = True
                 If cr > 30 And cr <= 123 Then
                     If Not dr Then
-                        na = na & Chr(cr)
+                        na &= Chr(cr)
 
                     End If
                 End If
@@ -849,7 +849,7 @@ next_m:
                 If cr = 0 Then dr = True
                 If cr > 64 And cr <= 123 Then
                     If Not dr Then
-                        na = na & Chr(cr)
+                        na &= Chr(cr)
                     End If
                 End If
             Next
@@ -1487,8 +1487,10 @@ all_done:
         Catch ex As Exception
 
         End Try
-        Dim indxcol As DataColumn = New DataColumn("index")
-        indxcol.DataType = System.Type.GetType("System.Int32")
+        Dim indxcol As New DataColumn("index") With {
+            .DataType = Type.GetType("System.Int32")
+        }
+
         geo.Columns.Add(indxcol)
         For i = 0 To geo.Rows.Count - 1
             geo.Rows(i).Item("index") = i
@@ -2579,9 +2581,10 @@ get_visual:
         If len = 0.0F Then len = 1.0F
 
         'reduce to unit size
-        p.x = (p.x / len)
-        p.y = (p.y / len)
-        p.z = (p.z / len)
+        p.x /= len
+        p.y /= len
+        p.z /= len
+
         Return p
     End Function
     Private Function unpackNormal_8_8_8(ByVal packed As UInt32) As vect3
