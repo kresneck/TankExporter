@@ -189,9 +189,6 @@ Module modGlobals
     Public current_tank_package As Integer
     Public custom_tables(10) As DataSet
     Public custom_list_tables(10) As DataSet
-    Public gun_tile() As vect4
-    Public hull_tile() As vect4
-    Public turret_tile() As vect4
     Public hull_tiling As vect4
     Public gun_tiling As vect4
     Public chassis_tiling As vect4
@@ -278,5 +275,6 @@ Module modGlobals
         Public nation As String
         Public type As String
     End Structure
+
 
 End Module

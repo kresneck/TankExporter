@@ -310,6 +310,7 @@
     </Compile>
     <Compile Include="Modules\blurFBO.vb" />
     <Compile Include="Modules\modBloom.vb" />
+    <Compile Include="Modules\modComponents.vb" />
     <Compile Include="Modules\modDecals.vb" />
     <Compile Include="Modules\modShadow.vb" />
     <Compile Include="Modules\modToLists.vb" />

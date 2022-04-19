@@ -2026,207 +2026,6 @@ loaded_jump:
         Dim docx = XDocument.Parse(TheXML_String)
         itemDefXmlString = TheXML_String
         Dim doc As New XmlDocument
-        Dim xmlroot As XmlNode = xDoc.CreateElement(XmlNodeType.Element, "root", "")
-        Dim root_node As XmlNode = doc.CreateElement("model")
-
-        'this is going to be a mess :(
-
-        'see if there is a exclusionmask in this file.. means its the old SD style tank.
-        For Each exclusion In docx.Descendants("exclusionMask")
-            exclusionMask_id = -1
-            Dim exclu = doc.CreateElement("exclusionMask")
-            Dim excluName = doc.CreateElement("name")
-            excluName.InnerText = exclusion.Value.ToString.Replace("/", "\")
-            If excluName.InnerText.Length > 2 And excluName.InnerText.ToLower.Contains("_cm") Then
-                GLOBAL_exclusionMask = 1
-                exclu.AppendChild(excluName)
-                root_node.AppendChild(exclu)
-            End If
-        Next
-
-        Dim chassis = doc.CreateElement("chassis")
-
-        Dim hulls = doc.CreateElement("hull")
-        Dim hull_tiling = doc.CreateElement("hull_tiling")
-
-        Dim turrets = doc.CreateElement("turrets")
-
-        Dim guns = doc.CreateElement("guns")
-        Dim gun_tiling = doc.CreateElement("gun_tiling")
-
-
-        'Add a dummy entry in to each element
-        ' so the xml is consistent building the tableset
-        Dim dummy = doc.CreateElement("chassis_name")
-        dummy.InnerText = ("dummy")
-        root_node.AppendChild(dummy)
-        dummy = doc.CreateElement("hull_name")
-        dummy.InnerText = ("dummy")
-        root_node.AppendChild(dummy)
-        dummy = doc.CreateElement("turret_name")
-        dummy.InnerText = ("dummy")
-        root_node.AppendChild(dummy)
-        dummy = doc.CreateElement("gun_name")
-        dummy.InnerText = ("dummy")
-        root_node.AppendChild(dummy)
-
-
-        Dim armor = docx.Descendants("undamaged")
-        For Each item In armor
-            Select Case True
-                Case item.Value.Contains("Chassis")
-                    Dim gn = doc.CreateElement("chassis_name")
-                    gn.InnerText = item.Value.Replace("/", "\")
-                    root_node.AppendChild(gn)
-                Case item.Value.Contains("Hull")
-                    Dim gn = doc.CreateElement("hull_name")
-                    gn.InnerText = item.Value.Replace("/", "\")
-                    root_node.AppendChild(gn)
-                Case item.Value.Contains("Turret")
-                    Dim gn = doc.CreateElement("turret_name")
-                    gn.InnerText = item.Value.Replace("/", "\")
-                    root_node.AppendChild(gn)
-                Case item.Value.Contains("Gun")
-                    Dim gn = doc.CreateElement("gun_name")
-                    gn.InnerText = item.Value.Replace("/", "\")
-                    root_node.AppendChild(gn)
-            End Select
-
-        Next
-        Dim camo = docx.Descendants("hull")
-        Dim tile = camo.Descendants("tiling")
-        hull_tiling.InnerText = tile.Value
-        root_node.AppendChild(hull_tiling)
-
-        camo = docx.Descendants("guns")
-        tile = camo.Descendants("tiling")
-        gun_tiling.InnerText = tile.Value
-
-        'root_node.AppendChild(chassis)
-        'root_node.AppendChild(hulls)
-        'root_node.AppendChild(turrets)
-        'root_node.AppendChild(guns)
-        root_node.AppendChild(gun_tiling)
-        root_node.AppendChild(hull_tiling)
-
-        doc.AppendChild(root_node)
-
-
-
-        Try
-
-            Dim track = doc.CreateElement("track_info")
-            Dim cnt = 1
-            Dim spline_ = docx.Descendants("splineDesc")
-            Dim segr = spline_.Descendants("segmentModelRight")
-            Dim segl = spline_.Descendants("segmentModelLeft")
-            Dim segleftname = doc.CreateElement("left_filename")
-            Dim segrightname = doc.CreateElement("right_filename")
-            segleftname.InnerText = segl.Value.ToString
-            segrightname.InnerText = segr.Value.ToString
-            track.AppendChild(segleftname)
-            track.AppendChild(segrightname)
-
-            If xDoc.OuterXml.Contains("segment2Model") Then
-                Dim segr2 = spline_.Descendants("segment2ModelRight")
-                Dim segl2 = spline_.Descendants("segment2ModelLeft")
-                Dim segleftname2 = doc.CreateElement("left2_filename")
-                Dim segrightname2 = doc.CreateElement("right2_filename")
-                segleftname2.InnerText = segl2.Value.ToString
-                segrightname2.InnerText = segr2.Value.ToString
-                track.AppendChild(segleftname2)
-                track.AppendChild(segrightname2)
-                cnt = 2
-
-
-            End If
-            'add seg cnt
-            Dim seg_cnt = doc.CreateElement("seg_cnt")
-            seg_cnt.InnerText = cnt.ToString
-            track.AppendChild(seg_cnt)
-
-            'get seglength and seg offsets
-            Dim seg_ = docx.Descendants("segmentLength")
-            Dim seg_length = doc.CreateElement("segment_length")
-            seg_length.InnerText = seg_.Value.ToString
-            track.AppendChild(seg_length)
-            Dim segoffset = docx.Descendants("segmentOffset")
-            Dim seg_off = doc.CreateElement("segmentOffset")
-            seg_off.InnerText = segoffset.Value.ToString
-            track.AppendChild(seg_off)
-
-            If xDoc.OuterXml.Contains("segment2Offset") Then
-                Dim segoffset2 = docx.Descendants("segment2Offset")
-                Dim seg_off2 = doc.CreateElement("segment2Offset")
-                seg_off2.InnerText = segoffset2.Value.ToString
-                track.AppendChild(seg_off2)
-
-            End If
-
-            root_node.AppendChild(track)
-
-        Catch ex As Exception
-
-        End Try
-
-        Dim fm As New MemoryStream
-        doc.Save(fm)
-        fm.Position = 0
-        data_set.ReadXml(fm)
-
-        'Delete the dummy now that the table has been built correctly.
-        data_set.Tables("chassis_name").Select.First.Delete()
-        data_set.Tables("hull_name").Select.First.Delete()
-        data_set.Tables("turret_name").Select.First.Delete()
-        data_set.Tables("gun_name").Select.First.Delete()
-        ms.Dispose()
-        fm.Dispose()
-
-        get_tank_parts_from_xml__TOM(tank)
-    End Sub
-
-    Public Sub get_tank_parts_from_xml__TOM(ByVal tank As String)
-        'once again the non-standard name calling causes issues
-        'Why not use USA for the nation in all paths???? czech, japan, sweeden, poland are ok as is
-        If tank.Contains("american") Then
-            tank = tank.Replace("american", "usa")
-        End If
-        If tank.Contains("british") Then
-            tank = tank.Replace("british", "uk")
-        End If
-        If tank.Contains("chinese") Then
-            tank = tank.Replace("chinese", "china")
-        End If
-        If tank.Contains("french") Then
-            tank = tank.Replace("french", "france")
-        End If
-        If tank.Contains("german") Then
-            tank = tank.Replace("german", "germany")
-        End If
-        If tank.Contains("russian") Then
-            tank = tank.Replace("russian", "ussr")
-        End If
-        ' dont need to change poland, czech, sweden or japan
-        'If tank.Contains("czech") Then
-        '    tank = tank.Replace("czech", "czech")
-        'End If
-
-        If tank.Contains(":") Then
-            Dim t = tank.Split(":")
-            tank = t(2)
-        End If
-        Dim f = scripts_pkg("scripts\item_defs\" + tank)
-        itemDefPathString = "scripts\item_defs\" + tank
-        If f Is Nothing Then
-            Return
-        End If
-        Dim ms As New MemoryStream
-        f.Extract(ms)
-        openXml_stream(ms, "nation")
-        ms.Dispose()
-        Dim docx = XDocument.Parse(TheXML_String)
-        itemDefXmlString = TheXML_String
-        Dim doc As New XmlDocument
         Dim root_node As XmlNode = doc.CreateElement("model")
 
         'this is going to be a mess :(
@@ -2311,11 +2110,9 @@ loaded_jump:
         Dim fm As New MemoryStream
         doc.Save(fm)
         fm.Position = 0
-        Dim data_set As New DataSet
         data_set.ReadXml(fm)
 
         fm.Dispose()
-
         ms.Dispose()
     End Sub
 
@@ -2326,8 +2123,16 @@ loaded_jump:
         Dim wotUndamaged = wotHullModels.Element("undamaged")
         Dim wotCrashed = wotHullModels.Element("destroyed")
 
+        Dim tilingText = ""
         Dim wotCamo = wotHullElement.Element("camouflage")
-        Dim wotTiling = wotCamo.Element("tiling")
+
+        If (wotCamo IsNot Nothing) Then
+            Dim wotTiling = wotCamo.Element("tiling")
+
+            If (wotTiling IsNot Nothing) Then
+                tilingText = wotTiling.Value
+            End If
+        End If
 
         Dim hull = doc.CreateElement("hull")
         Dim undamagedPath = doc.CreateElement("undamagedPath")
@@ -2337,11 +2142,8 @@ loaded_jump:
         crashedPath.InnerText = wotCrashed.Value.Replace("/", "\")
 
         Dim tiling = doc.CreateElement("tiling")
-        If (wotTiling IsNot Nothing) Then
-            tiling.InnerText = wotTiling.Value
-        Else
-            tiling.InnerText = ""
-        End If
+
+        tiling.InnerText = tilingText
 
         hull.AppendChild(undamagedPath)
         hull.AppendChild(crashedPath)
@@ -2385,6 +2187,16 @@ loaded_jump:
             Dim undamaged = models.Element("undamaged")
             Dim crashed = models.Element("destroyed")
 
+            Dim tilingText = ""
+            Dim camo = wotTurret.Element("camouflage")
+
+            If (camo IsNot Nothing) Then
+                Dim wotTiling = camo.Element("tiling")
+
+                If (wotTiling IsNot Nothing) Then
+                    tilingText = wotTiling.Value
+                End If
+            End If
 
             Dim turret = doc.CreateElement("turret")
             Dim name = doc.CreateElement("name")
@@ -2396,9 +2208,14 @@ loaded_jump:
             Dim crashedPath = doc.CreateElement("crashedPath")
             crashedPath.InnerText = crashed.Value.Replace("/", "\")
 
+            Dim tiling = doc.CreateElement("tiling")
+            tiling.InnerText = tilingText
+
+
             turret.AppendChild(name)
             turret.AppendChild(undamagedPath)
             turret.AppendChild(crashedPath)
+            turret.AppendChild(tiling)
 
             get_guns_from_xml(wotTurret, doc, turret)
 
@@ -2415,8 +2232,17 @@ loaded_jump:
             Dim undamaged = models.Element("undamaged")
             Dim crashed = models.Element("destroyed")
 
-            Dim camo = wotGun.Element("camouflage")
-            Dim wotTiling = camo.Element("tiling")
+            Dim tilingText = ""
+            Dim wotCamo = wotGun.Element("camouflage")
+
+            If (wotCamo IsNot Nothing) Then
+                Dim wotTiling = wotCamo.Element("tiling")
+
+                If (wotTiling IsNot Nothing) Then
+                    tilingText = wotTiling.Value
+                End If
+            End If
+
 
             Dim gun = doc.CreateElement("gun")
             Dim name = doc.CreateElement("name")
@@ -2429,11 +2255,7 @@ loaded_jump:
             crashedPath.InnerText = crashed.Value.Replace("/", "\")
 
             Dim tiling = doc.CreateElement("tiling")
-            If (wotTiling IsNot Nothing) Then
-                tiling.InnerText = wotTiling.Value
-            Else
-                tiling.InnerText = ""
-            End If
+            tiling.InnerText = tilingText
 
             gun.AppendChild(name)
             gun.AppendChild(undamagedPath)
@@ -6043,115 +5865,97 @@ fuckit:
         '-------------------------------------------------------
         'Return
         'get take part paths from table
-        Dim turrets As New List(Of String)
-        Dim guns As New List(Of String)
-        Dim hulls As New List(Of String)
-        Dim chassis As New List(Of String)
+        Dim turretz As New List(Of TurretComponent)
+        Dim hulls As New List(Of Component)
+        Dim chassis As New List(Of Component)
 
-        ReDim hull_tile(10)
-        ReDim gun_tile(64)
-        ReDim turret_tile(10)
-        Dim cnt As Integer = 0
-
-        Dim tbl = t.Tables("gun_name")
-        Dim q = From row In tbl.AsEnumerable
-                Select
-                g_name = row.Field(Of String)("gun_name_Text")
-
-        Dim tq = From rom In t.Tables("model")
-                 Select
-                    gun_tiling = rom.Field(Of String)("gun_tiling"),
-                    hull_tiling = rom.Field(Of String)("hull_tiling")
-        '-------------------------------------------------------
-        'fix stupid missing things in their files
-        Dim gt = tq(0).gun_tiling.Split(" ")
-        If gt.Length = 1 Then
-            ReDim gt(4)
-            gt(0) = "1"
-            gt(1) = "1"
-            gt(2) = "0"
-            gt(3) = "0"
-        End If
-        Dim ht = tq(0).hull_tiling.Split(" ")
-        If ht.Length = 1 Then
-            ReDim ht(4)
-            ht(0) = "1"
-            ht(1) = "1"
-            ht(2) = "0"
-            ht(3) = "0"
-        End If
-        'guns
-        For Each thing In q
-            gun_tile(cnt) = New vect4
-
-            gun_tile(cnt).x = CSng(gt(0))
-            gun_tile(cnt).y = CSng(gt(1))
-            gun_tile(cnt).z = CSng(gt(2))
-            gun_tile(cnt).w = CSng(gt(3))
-
-            turret_tile(cnt).x = CSng(ht(0))
-            turret_tile(cnt).y = CSng(ht(1))
-            turret_tile(cnt).z = CSng(ht(2))
-            turret_tile(cnt).w = CSng(ht(3))
-
-            hull_tile(cnt).x = CSng(ht(0))
-            hull_tile(cnt).y = CSng(ht(1))
-            hull_tile(cnt).z = CSng(ht(2))
-            hull_tile(cnt).w = CSng(ht(3))
-            cnt += 1
-        Next
-        If cnt = 0 Then
-            bad_tanks.AppendLine(file_name)
-            Return
-        End If
-        ReDim Preserve gun_tile(cnt)
-        ReDim Preserve turret_tile(cnt)
-        '-------------------------------------------------------
-
-        cnt = 0
         '----- chassis
 
-        tbl = t.Tables("chassis_name")
-        Dim q2 = From row In tbl.AsEnumerable
+        Dim tbl = t.Tables("chassis")
+        Dim q1 = From row In tbl.AsEnumerable
                  Select
-            chass = row.Field(Of String)("chassis_name_Text")
-        For Each thing In q2
-            chassis.Add(thing)
-            cnt += 1
+            name = row.Field(Of String)("name"),
+            undamagedPath = row.Field(Of String)("undamagedPath"),
+            crashedPath = row.Field(Of String)("crashedPath")
+
+        For Each result In q1
+            Dim item As New Component
+
+            item.name = result.name
+            item.undamagedPath = result.undamagedPath
+            item.crashedPath = result.crashedPath
+            item.tiling = ""
+
+            chassis.Add(item)
         Next
-        If cnt = 0 Then
+        If chassis.Count = 0 Then
             bad_tanks.AppendLine(file_name)
             Return
         End If
 
-        cnt = 0
-        tbl = t.Tables("gun_name")
-        q2 = From row In tbl.AsEnumerable
-             Select
-            gn = row.Field(Of String)("gun_name_Text")
-        For Each thing In q2
-            guns.Add(thing)
-            cnt += 1
+        tbl = t.Tables("hull")
+        Dim q3 = From row In tbl.AsEnumerable
+                 Select
+            undamagedPath = row.Field(Of String)("undamagedPath"),
+            crashedPath = row.Field(Of String)("crashedPath"),
+            tiling = row.Field(Of String)("tiling")
+
+        For Each result In q3
+            Dim item As New Component
+
+            item.name = "Hull"
+            item.undamagedPath = result.undamagedPath
+            item.crashedPath = result.crashedPath
+            item.tiling = result.tiling
+
+            hulls.Add(item)
         Next
 
-        cnt = 0
-        tbl = t.Tables("hull_name")
-        q2 = From row In tbl.AsEnumerable
-             Select
-            hul = row.Field(Of String)("hull_name_Text")
-        For Each thing In q2
-            hulls.Add(thing)
-            cnt += 1
-        Next
+        tbl = t.Tables("turret")
+        Dim q4 = From row In tbl.AsEnumerable
+                 Select
+            name = row.Field(Of String)("name"),
+            undamagedPath = row.Field(Of String)("undamagedPath"),
+            crashedPath = row.Field(Of String)("crashedPath"),
+            tiling = row.Field(Of String)("tiling"),
+            turret_id = row.Field(Of Integer)("turret_id")
 
-        cnt = 0
-        tbl = t.Tables("turret_name")
-        q2 = From row In tbl.AsEnumerable
-             Select
-            tur = row.Field(Of String)("turret_name_Text")
-        For Each thing In q2
-            turrets.Add(thing)
-            cnt += 1
+        For Each result In q4
+            Dim guns As New List(Of Component)
+            Dim gunTbl = t.Tables("gun")
+            Dim gunQ = From gunRow In gunTbl.AsEnumerable
+                       Where
+                    gunRow.Field(Of Integer)("turret_id") = result.turret_id
+                       Select
+                    name = gunRow.Field(Of String)("name"),
+                    undamagedPath = gunRow.Field(Of String)("undamagedPath"),
+                    crashedPath = gunRow.Field(Of String)("crashedPath"),
+                    tiling = gunRow.Field(Of String)("tiling")
+
+
+
+            For Each gunResult In gunQ
+                Dim gun As New Component
+
+                gun.name = gunResult.name
+                gun.undamagedPath = gunResult.undamagedPath
+                gun.crashedPath = gunResult.crashedPath
+                gun.tiling = gunResult.tiling
+
+                guns.Add(gun)
+            Next
+
+
+            Dim item As New TurretComponent
+
+            item.name = result.name
+            item.undamagedPath = result.undamagedPath
+            item.crashedPath = result.crashedPath
+            item.tiling = result.tiling
+            item.gunList = guns
+
+
+            turretz.Add(item)
         Next
 
         '-------------------------------------------------------
@@ -6159,8 +5963,7 @@ fuckit:
         'setup treeview and its nodes
         '+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         If Not save_tank Then
-            frmComponents.turrets = turrets
-            frmComponents.guns = guns
+            frmComponents.turrets = turretz
             frmComponents.hulls = hulls
             frmComponents.chassis = chassis
 
@@ -6174,62 +5977,93 @@ fuckit:
             Else
                 frmComponents.Location = Me.Location + New Point(200, 200)
             End If
-            frmComponents.ShowDialog(Me)
-            If frmFBX.Visible Then
-                frmFBX.Location = Me.Location
+
+
+
+            If (frmComponents.ShowDialog(Me) <> DialogResult.OK) Then
+                Return
             End If
+
+
+            If frmFBX.Visible Then
+                    frmFBX.Location = Me.Location
+                End If
+            End If
+
+            '-------------------------------------------------------
+
+
+            Dim turretPath As String
+        turretPath = frmComponents.selectedTurret.undamagedPath
+
+
+        turret_tiling = New vect4
+
+
+        Dim tt = frmComponents.selectedTurret.tiling.Split(" ")
+        If tt.Length = 1 Then
+            ReDim tt(4)
+            tt(0) = "1"
+            tt(1) = "1"
+            tt(2) = "0"
+            tt(3) = "0"
         End If
 
-        '-------------------------------------------------------
-        'Array.Sort(guns)
-        'Array.Sort(turrets)
-        'Array.Sort(hulls)
-        'Array.Sort(chassis)
-        'more hacks to deal with turret names
-        Dim turret_name As String
-        Dim t_idx = frmComponents.t_idx
-        turret_name = turrets(t_idx)
-        'Try
-        'Catch ex1 As Exception
-        '    'Try
-        '    '    turret_name = turrets(turrets.Length - 2)
-        '    'Catch ex2 As Exception
-        '    '    turret_name = turrets(turrets.Length - 1)
-        '    'End Try
+        turret_tiling.x = CSng(tt(0))
+        turret_tiling.y = CSng(tt(1))
+        turret_tiling.z = CSng(tt(2))
+        turret_tiling.w = CSng(tt(3))
 
-        'End Try
-        turret_tiling = turret_tile(t_idx)
+
+
         'Try
         'Catch ex As Exception
         '    'turret_tiling = turret_tile(turrets.Length - 2)
         'End Try
 
-        Dim h_idx = frmComponents.h_idx
-        Dim hull_name = hulls(h_idx)
-        hull_tiling = hull_tile(h_idx)
+        Dim hullPath = frmComponents.selectedHull.undamagedPath
 
-        Dim c_idx = frmComponents.c_idx
-        Dim chassis_name = chassis(c_idx)
+        Dim ht = frmComponents.selectedHull.tiling.Split(" ")
+        If ht.Length = 1 Then
+            ReDim ht(4)
+            ht(0) = "1"
+            ht(1) = "1"
+            ht(2) = "0"
+            ht(3) = "0"
+        End If
+
+        hull_tiling = New vect4
+
+        hull_tiling.x = CSng(ht(0))
+        hull_tiling.y = CSng(ht(1))
+        hull_tiling.z = CSng(ht(2))
+        hull_tiling.w = CSng(ht(3))
+
+        Dim chassis_name = frmComponents.selectedChassis.undamagedPath
 
         Dim gun_name As String = ""
-        Dim g_idx = frmComponents.g_idx
         Dim ti, tj As New vect4
-        gun_name = guns(g_idx)
-        ti = gun_tile(g_idx)
+        gun_name = frmComponents.selectedGun.undamagedPath
+        Dim gt = frmComponents.selectedGun.tiling.Split(" ")
+        If gt.Length = 1 Then
+            ReDim gt(4)
+            gt(0) = "1"
+            gt(1) = "1"
+            gt(2) = "0"
+            gt(3) = "0"
+        End If
+
+        ti = New vect4
+        ti.x = CSng(gt(0))
+        ti.y = CSng(gt(1))
+        ti.z = CSng(gt(2))
+        ti.w = CSng(gt(3))
+
         tj = ti
         tj.w = ti.z
         tj.z = ti.w
         gun_tiling = tj
 
-        'If guns.Length = 10 Then
-        '    gun_name = guns(g_idx)
-        '    ti = gun_tile(g_idx)
-        '    tj = ti
-        '    tj.w = ti.z
-        '    tj.z = ti.w
-        '    gun_tiling = tj
-        'Else
-        'End If
         '========================================
         Dim nation_string As String = ""
         Select Case ar(1)
@@ -6272,12 +6106,12 @@ fuckit:
         Dim d = custom_tables(CURRENT_DATA_SET).Copy
         '===================================
 
-        Dim tt = d.Tables("armorcolor")
-        Dim qq = From row In tt.AsEnumerable
-        Select _
+        Dim acTable = d.Tables("armorcolor")
+        Dim qq = From row In acTable.AsEnumerable
+                 Select
         armorC = row.Field(Of String)("aColor")
         ARMORCOLOR = get_vect4(qq(0))
-        tt.Dispose()
+        acTable.Dispose()
 
         'clear tank variables
         gun_trans = New vect3
@@ -6327,13 +6161,13 @@ fuckit:
             Else
                 track_info.segment_count = 2
                 Dim t1q = From row In tbl.AsEnumerable
-                            Select _
-                            trp = row.Field(Of String)("right_filename"), _
-                            tlp = row.Field(Of String)("left_filename"), _
-                            seglength = row.Field(Of String)("segment_length"), _
-                            seg_off = row.Field(Of String)("segmentOffset"), _
-                            trp2 = row.Field(Of String)("right2_filename"), _
-                            tlp2 = row.Field(Of String)("left2_filename"), _
+                          Select
+                            trp = row.Field(Of String)("right_filename"),
+                            tlp = row.Field(Of String)("left_filename"),
+                            seglength = row.Field(Of String)("segment_length"),
+                            seg_off = row.Field(Of String)("segmentOffset"),
+                            trp2 = row.Field(Of String)("right2_filename"),
+                            tlp2 = row.Field(Of String)("left2_filename"),
                             seg_off2 = row.Field(Of String)("segment2Offset")
                 For Each tr In t1q
                     track_info.left_path1 = tr.tlp
@@ -6437,30 +6271,30 @@ fuckit:
         LOAD_ERROR = LOAD_ERROR And build_primitive_data(False) ' -- chassis
         If stop_updating Then draw_scene()
 
-        file_name = hull_name
+        file_name = hullPath
         LOAD_ERROR = LOAD_ERROR And build_primitive_data(True) ' -- hull
         If stop_updating Then draw_scene()
 
         If WRITE_FBX_NOW Then
 
-            file_name = turret_name
+            file_name = turretPath
             LOAD_ERROR = LOAD_ERROR And build_primitive_data(True) ' -- turret
 
-            For gn = guns.Count - 1 To 0 Step -1
-                file_name = guns(gn)
-                gun_name = file_name
-                If LOAD_ERROR = LOAD_ERROR And build_primitive_data(True) Then ' -- gun
-                    If stop_updating Then draw_scene()
-                    Exit For
-                End If
+            '            For gn = guns.Count - 1 To 0 Step -1
+            '           file_name = guns(gn).undamagedPath
+            '          gun_name = file_name
+            '         If LOAD_ERROR = LOAD_ERROR And build_primitive_data(True) Then ' -- gun
+            '        If stop_updating Then draw_scene()
+            '       Exit For
+            '  End If
 
-            Next
+            '      Next
         Else
-            file_name = turrets(frmComponents.tv_turrets.SelectedNode.Tag)
+            file_name = frmComponents.selectedTurret.undamagedPath
             LOAD_ERROR = LOAD_ERROR And build_primitive_data(True) ' -- turret
             If stop_updating Then draw_scene()
 
-            file_name = guns(frmComponents.tv_guns.SelectedNode.Tag)
+            file_name = frmComponents.selectedGun.undamagedPath
             LOAD_ERROR = LOAD_ERROR And build_primitive_data(True) ' -- gun
             If stop_updating Then draw_scene()
 
@@ -7786,6 +7620,10 @@ skip_old_way:
     End Sub
 
     Public Function find_icon_image(ByVal in_s As String) As Boolean
+
+        If (in_s Is Nothing) Then
+            Return False
+        End If
 
         '1
         For Each n As TreeNode In TreeView1.Nodes

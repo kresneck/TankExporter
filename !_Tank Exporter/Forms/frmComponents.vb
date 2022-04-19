@@ -1,13 +1,14 @@
 ﻿Imports System.IO
 Imports System.Windows.Forms
 Public Class frmComponents
-    Public c_idx, h_idx, g_idx, t_idx As Integer
 
+    Public selectedTurret As TurretComponent
+    Public selectedGun, selectedHull, selectedChassis As Component
 
-    Public turrets, guns, hulls, chassis As List(Of String)
+    Public turrets As List(Of TurretComponent)
+    Public guns, hulls, chassis As List(Of Component)
 
     Public Sub RefreshDisplay()
-        RefreshGuns()
         RefreshTurrets()
         RefreshHulls()
         RefreshChassis()
@@ -16,16 +17,17 @@ Public Class frmComponents
     Private Sub RefreshGuns()
         tv_guns.Nodes.Clear()
 
-        Dim cn = 0
+        guns = tv_turrets.SelectedNode.Tag.gunList
+
         For i = 0 To guns.Count - 1
-            If frmMain.validate_path(guns(i)) = guns(i) Then
+            If frmMain.validate_path(guns(i).undamagedPath) = guns(i).undamagedPath Then
+
                 Dim n = New TreeNode
 
-                n.Text = Path.GetFileNameWithoutExtension(guns(i))
-                If guns(i).Contains("_skin") Then n.Text += " (Skin)"
-                n.Tag = i
+                n.Text = guns(i).name
+                If guns(i).undamagedPath.Contains("_skin") Then n.Text += " (Skin)"
+                n.Tag = guns(i)
                 tv_guns.Nodes.Add(n)
-                cn += 1
             End If
         Next
         tv_guns.SelectedNode = tv_guns.Nodes(0)
@@ -35,33 +37,31 @@ Public Class frmComponents
     Private Sub RefreshTurrets()
         tv_turrets.Nodes.Clear()
 
-        Dim cn = 0
         For i = 0 To turrets.Count - 1
-            If frmMain.validate_path(turrets(i)) = turrets(i) Then
+            If frmMain.validate_path(turrets(i).undamagedPath) = turrets(i).undamagedPath Then
                 Dim n = New TreeNode
-                n.Text = Path.GetFileNameWithoutExtension(turrets(i))
-                If turrets(i).Contains("_skin") Then n.Text += " (Skin)"
-                n.Tag = i
+                n.Text = turrets(i).name
+                If turrets(i).undamagedPath.Contains("_skin") Then n.Text += " (Skin)"
+                n.Tag = turrets(i)
                 tv_turrets.Nodes.Add(n)
-                cn += 1
             End If
         Next
         tv_turrets.SelectedNode = tv_turrets.Nodes(0)
         tv_turrets.SelectedNode.Checked = True
+
+        RefreshGuns()
     End Sub
 
     Private Sub RefreshHulls()
         tv_hulls.Nodes.Clear()
 
-        Dim cn = 0
         For i = 0 To hulls.Count - 1
-            If frmMain.validate_path(hulls(i)) = hulls(i) Then
+            If frmMain.validate_path(hulls(i).undamagedPath) = hulls(i).undamagedPath Then
                 Dim n = New TreeNode
-                n.Text = Path.GetFileNameWithoutExtension(hulls(i))
-                If hulls(i).Contains("_skin") Then n.Text += " (Skin)"
-                n.Tag = i
+                n.Text = hulls(i).name
+                If hulls(i).undamagedPath.Contains("_skin") Then n.Text += " (Skin)"
+                n.Tag = hulls(i)
                 tv_hulls.Nodes.Add(n)
-                cn += 1
             End If
         Next
         tv_hulls.SelectedNode = tv_hulls.Nodes(0)
@@ -70,15 +70,13 @@ Public Class frmComponents
 
     Private Sub RefreshChassis()
         tv_chassis.Nodes.Clear()
-        Dim cn = 0
         For i = 0 To chassis.Count - 1
-            If frmMain.validate_path(chassis(i)) = chassis(i) Then
+            If frmMain.validate_path(chassis(i).undamagedPath) = chassis(i).undamagedPath Then
                 Dim n = New TreeNode
-                n.Text = Path.GetFileNameWithoutExtension(chassis(i))
-                If chassis(i).Contains("_skin") Then n.Text += " (Skin)"
-                n.Tag = i
+                n.Text = chassis(i).name
+                If chassis(i).undamagedPath.Contains("_skin") Then n.Text += " (Skin)"
+                n.Tag = chassis(i)
                 tv_chassis.Nodes.Add(n)
-                cn += 1
             End If
         Next
         tv_chassis.SelectedNode = tv_chassis.Nodes(0)
@@ -104,6 +102,10 @@ Public Class frmComponents
         Next
         tv.SelectedNode = e.Node
         tv.SelectedNode.Checked = True
+
+        guns = e.Node.Tag.gunList
+
+        RefreshGuns()
     End Sub
 
     Private Sub tv_hulls_NodeMouseClick(sender As Object, e As TreeNodeMouseClickEventArgs) Handles tv_hulls.NodeMouseClick
@@ -127,15 +129,17 @@ Public Class frmComponents
     End Sub
 
     Private Sub continue_bt_Click(sender As Object, e As EventArgs) Handles continue_bt.Click
+        Me.DialogResult = DialogResult.OK
         Me.Close()
     End Sub
 
     Private Sub frmComponents_FormClosing(sender As Object, e As FormClosingEventArgs) Handles Me.FormClosing
-        e.Cancel = True 'cant destroy the viewtree data
-        c_idx = tv_chassis.SelectedNode.Index
-        h_idx = tv_hulls.SelectedNode.Index
-        g_idx = tv_guns.SelectedNode.Index
-        t_idx = tv_turrets.SelectedNode.Index
+        'e.Cancel = True 'cant destroy the viewtree data
+        selectedTurret = tv_turrets.SelectedNode.Tag
+        selectedGun = tv_guns.SelectedNode.Tag
+        selectedHull = tv_hulls.SelectedNode.Tag
+        selectedChassis = tv_chassis.SelectedNode.Tag
+
         Me.Hide()
     End Sub
 
